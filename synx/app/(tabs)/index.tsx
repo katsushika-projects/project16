@@ -1,74 +1,102 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  FlatList,
+  Image,
+  useWindowDimensions,
+  TouchableOpacity,
+  Platform,
+  TouchableHighlight,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { ThemedView } from "@/components/ThemedView";
+import { PhotoItem } from "@/types/home";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+// サンプル写真データ
+const photoData: PhotoItem[] = Array(20)
+  .fill(0)
+  .map((_, i) => ({
+    id: i.toString(),
+    uri: `https://picsum.photos/id/${i + 10}/200/200`,
+    title: `写真 ${i + 1}`,
+  }));
 
 export default function HomeScreen() {
+  const [photos, setPhotos] = useState(photoData);
+  // 画面サイズを動的に取得
+  const { width: screenWidth } = useWindowDimensions();
+
+  // 写真をタップした時の処理
+  const handlePhotoPress = (id: string) => {
+    console.log(`写真 ${id} がタップされました`);
+  };
+
+  // プラスボタンをタップした時の処理
+  const handleAddPress = () => {
+    console.log("写真を追加します");
+    // ここに写真追加ロジックを実装
+  };
+
+  // 写真アイテムのレンダリング
+  const renderPhotoItem = ({ item }: { item: PhotoItem }) => (
+    <TouchableHighlight
+      style={[
+        styles.photoItem,
+        { width: screenWidth / 3, height: screenWidth / 3 },
+      ]}
+      onPress={() => handlePhotoPress(item.id)}
+      underlayColor="rgba(255, 255, 255, 0.8)"
+      activeOpacity={0.7}
+    >
+      <Image source={{ uri: item.uri }} style={styles.photo} />
+    </TouchableHighlight>
+  );
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <ThemedView style={styles.container}>
+      <FlatList
+        data={photos}
+        renderItem={renderPhotoItem}
+        keyExtractor={(item) => item.id}
+        numColumns={3}
+      />
+      <TouchableOpacity style={styles.addButton} onPress={handleAddPress}>
+        <Ionicons name="add" size={30} color="white" />
+      </TouchableOpacity>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  photoItem: {
+    padding: 1,
+    // widthとheightはコンポーネント内で動的に設定
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  photo: {
+    width: "100%",
+    height: "100%",
+  },
+  addButton: {
+    position: "absolute",
+    right: 20,
+    bottom: 20,
+    backgroundColor: "#2196F3",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 3,
+      },
+    }),
   },
 });
